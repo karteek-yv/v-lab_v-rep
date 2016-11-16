@@ -85,30 +85,14 @@ function DaguArmControl_PnP()
         val1 = input('Enter 0 to close gripper and 1 to open gripper');
         returnCode = simxSetIntegerSignal(clientID, 'RG2_open', val1, vrep.simx_opmode_oneshot)
         simxGetPingTime(clientID);
-        pause(0.2);
+        pause(2);
         simxPauseCommunication(clientID,1);
-        [theta, fval, info] = fsolve (@(theta)my_fun_ik(theta,[0 0 426],Link_len), [0 0 0 0]);
-        if abs(fval) < 1e-3 && z > 0
-          if theta(1) > pi/2
-            theta(1) = -pi + theta(1);
-            theta(2) = - theta(2);
-            theta(3) = - theta(3);
-            theta(4) = - theta(4);
-          elseif theta(1) < -pi/2
-            theta(1) = pi + theta(1);
-            theta(2) = - theta(2);
-            theta(3) = - theta(3);
-            theta(4) = - theta(4);
-          endif
-          theta_deg = theta*180/pi
-          simxPauseCommunication(clientID,1);
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4), vrep.simx_opmode_oneshot);
-          simxPauseCommunication(clientID,0);          
-          pause(3);
-        endif
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), 0, vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), 0, vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), 0, vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), 0, vrep.simx_opmode_oneshot);
+        simxPauseCommunication(clientID,0);          
+        pause(1);
         simxPauseCommunication(clientID,0);
         simxGetPingTime(clientID);
       else
