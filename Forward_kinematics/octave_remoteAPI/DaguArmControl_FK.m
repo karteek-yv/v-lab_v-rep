@@ -32,7 +32,7 @@
 % and redistributed under GNU-GPL-V3.0
 
 function DaguArmControl_FK()
-  global l1=93 l2=80 l3=81 l4=172 x y z
+  Link_len = [93,80,81,172]; %Link lengths are defined
   theta(5)=0;
   position(5)=0;
   disp('Octave remote API simulation started');
@@ -62,10 +62,8 @@ function DaguArmControl_FK()
       theta(4) = input('Enter theta4 in degrees: ');
       %theta(5) = input('Enter theta5 in degrees: ');
       theta = theta * pi/180;
-      my_fun(theta);
-      x
-      y
-      z
+      Target_P=my_fun_fk(theta,Link_len);
+      disp(Target_P);
       simxPauseCommunication(clientID,1);
       returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
       returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
@@ -83,10 +81,10 @@ function DaguArmControl_FK()
 	endif
 	disp('Program ended');
 end
-function fun1 = my_fun (theta)
-  global l1 l2 l3 l4 x y z
-	r = l2*sin(theta(2)) + l3*sin(theta(2)+theta(3)) + l4*sin(theta(2)+theta(3)+theta(4));
-  x = r*cos(theta(1));
-  y = r*sin(theta(1));
-  z = l1 + l2*cos(theta(2)) + l3*cos(theta(2)+theta(3)) + l4*cos(theta(2)+theta(3)+theta(4));
+function fun2 = my_fun_fk (theta,Link_len)
+	r = Link_len(2)*sin(theta(2)) + Link_len(3)*sin(theta(2)+theta(3)) + Link_len(4)*sin(theta(2)+theta(3)+theta(4));
+  fun2(1) = r*cos(theta(1));
+  fun2(2) = r*sin(theta(1));
+  fun2(3) = Link_len(1) + Link_len(2)*cos(theta(2)) + Link_len(3)*cos(theta(2)+theta(3)) + Link_len(4)*cos(theta(2)+theta(3)+theta(4));
+  return;
 endfunction

@@ -32,8 +32,8 @@
 % and redistributed under GNU-GPL-V3.0
 
 function DaguArmControl_PnP()
-clear
-global l1=93 l2=80 l3=81 l4=172 x y z
+  clear
+  Link_len = [93,80,81,172];
   position(5)=0;
   disp('Octave remote API simulation started');
 	vrep=remApiSetup();
@@ -62,7 +62,7 @@ global l1=93 l2=80 l3=81 l4=172 x y z
       x=input("Enter x-coorinate: ");
       y=input("Enter y-coorinate: ");
       z=input("Enter z-coorinate: ");
-      [theta, fval, info] = fsolve (@my_fun, [0 0 0 0]);
+      [theta, fval, info] = fsolve (@(theta)my_fun_ik(theta,[x y z],Link_len), [0 0 0 0]);
       if abs(fval) < 1e-3 && z > 0
         if theta(1) > pi/2
           theta(1) = -pi + theta(1);
@@ -85,23 +85,29 @@ global l1=93 l2=80 l3=81 l4=172 x y z
         val1 = input('Enter 0 to close gripper and 1 to open gripper');
         returnCode = simxSetIntegerSignal(clientID, 'RG2_open', val1, vrep.simx_opmode_oneshot)
         simxGetPingTime(clientID);
-        pause(3);
+        pause(0.2);
         simxPauseCommunication(clientID,1);
-        %returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
-        if(theta(2)<0)
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2)+0.2, vrep.simx_opmode_oneshot);
-        else
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2)-0.2, vrep.simx_opmode_oneshot);
-        endif
-        if(theta(3)<0)
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3)+0.2, vrep.simx_opmode_oneshot);
-        else
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3)-0.2, vrep.simx_opmode_oneshot);
-        endif
-        if(theta(4)<0)
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4)+0.2, vrep.simx_opmode_oneshot);
-        else
-          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4)-0.2, vrep.simx_opmode_oneshot);
+        [theta, fval, info] = fsolve (@(theta)my_fun_ik(theta,[0 0 426],Link_len), [0 0 0 0]);
+        if abs(fval) < 1e-3 && z > 0
+          if theta(1) > pi/2
+            theta(1) = -pi + theta(1);
+            theta(2) = - theta(2);
+            theta(3) = - theta(3);
+            theta(4) = - theta(4);
+          elseif theta(1) < -pi/2
+            theta(1) = pi + theta(1);
+            theta(2) = - theta(2);
+            theta(3) = - theta(3);
+            theta(4) = - theta(4);
+          endif
+          theta_deg = theta*180/pi
+          simxPauseCommunication(clientID,1);
+          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
+          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
+          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
+          returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4), vrep.simx_opmode_oneshot);
+          simxPauseCommunication(clientID,0);          
+          pause(3);
         endif
         simxPauseCommunication(clientID,0);
         simxGetPingTime(clientID);
@@ -116,11 +122,17 @@ global l1=93 l2=80 l3=81 l4=172 x y z
 	endif
 	disp('Program ended');
 end
-function fun1 = my_fun (theta)
-  global l1 l2 l3 l4 x y z
+function fun1 = my_fun_ik (theta,target,Link_len)
   fun1 = zeros (3, 1);
-	r=sqrt(x^2 + y^2);
-  fun1(1) = l1 + l2*cos(theta(2)) + l3*cos(theta(2)+theta(3)) + l4*cos(theta(2)+theta(3)+theta(4)) - z;
-	fun1(2) = l2*sin(theta(2)) + l3*sin(theta(2)+theta(3)) + l4*sin(theta(2)+theta(3)+theta(4))- r;
-	fun1(3) = theta(1) - atan2(y,x);
+	r=sqrt((target(1))^2 + (target(2))^2);
+  fun1(1) = Link_len(1) + Link_len(2)*cos(theta(2)) + Link_len(3)*cos(theta(2)+theta(3)) + Link_len(4)*cos(theta(2)+theta(3)+theta(4)) - target(3);
+	fun1(2) = Link_len(2)*sin(theta(2)) + Link_len(3)*sin(theta(2)+theta(3)) + Link_len(4)*sin(theta(2)+theta(3)+theta(4))- r;
+	fun1(3) = theta(1) - atan2(target(2),target(1));
+endfunction
+function fun2 = my_fun_fk (theta,Link_len)
+	r = Link_len(2)*sin(theta(2)) + Link_len(3)*sin(theta(2)+theta(3)) + Link_len(4)*sin(theta(2)+theta(3)+theta(4));
+  fun2(1) = r*cos(theta(1));
+  fun2(2) = r*sin(theta(1));
+  fun2(3) = Link_len(1) + Link_len(2)*cos(theta(2)) + Link_len(3)*cos(theta(2)+theta(3)) + Link_len(4)*cos(theta(2)+theta(3)+theta(4));
+  return;
 endfunction
