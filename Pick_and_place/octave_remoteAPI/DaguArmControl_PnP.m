@@ -85,12 +85,13 @@ function DaguArmControl_PnP()
         val1 = input('Enter 0 to close gripper and 1 to open gripper');
         returnCode = simxSetIntegerSignal(clientID, 'RG2_open', val1, vrep.simx_opmode_oneshot)
         simxGetPingTime(clientID);
+        theta(2:4)=theta(2:4)-sign(theta(2:4))*10*pi/180;
         pause(2);
         simxPauseCommunication(clientID,1);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), 0, vrep.simx_opmode_oneshot);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), 0, vrep.simx_opmode_oneshot);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), 0, vrep.simx_opmode_oneshot);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), 0, vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4), vrep.simx_opmode_oneshot);
         simxPauseCommunication(clientID,0);          
         pause(1);
         simxPauseCommunication(clientID,0);
