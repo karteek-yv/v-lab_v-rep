@@ -41,6 +41,8 @@ function DaguArmControl_PnP()
 	clientID=simxStart('127.0.0.1',19999,true,true,5000,5);
 	if (clientID>-1)
 		disp('Connected to remote API server');
+    simxSynchronous(clientID,true);
+    simxStartSimulation(clientID,vrep.simx_opmode_oneshot);
     for i = 1:5
       [returnCode,shaft_handles] = simxGetObjectHandle(clientID,strcat('Servo_shaft_',mat2str(i)),vrep.simx_opmode_blocking);
       shaft_handles_list(i)=shaft_handles;
@@ -76,26 +78,49 @@ function DaguArmControl_PnP()
           theta(4) = - theta(4);
         endif
         theta_deg = theta*180/pi
-        simxPauseCommunication(clientID,1);
         returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
+        [returnCode, position(1)] = simxGetJointPosition(clientID,shaft_handles_list(1),vrep.simx_opmode_buffer);
+        while(position(1) > theta(1)+0.01 || position(1) < theta(1)-0.01)
+          [returnCode, position(1)] = simxGetJointPosition(clientID,shaft_handles_list(1),vrep.simx_opmode_buffer);
+        endwhile
         returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
+        [returnCode, position(2)] = simxGetJointPosition(clientID,shaft_handles_list(2),vrep.simx_opmode_buffer);
+        while(position(2) > theta(2)+0.01 || position(2) < theta(2)-0.01)
+          [returnCode, position(2)] = simxGetJointPosition(clientID,shaft_handles_list(2),vrep.simx_opmode_buffer);
+        endwhile
         returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
+        [returnCode, position(3)] = simxGetJointPosition(clientID,shaft_handles_list(3),vrep.simx_opmode_buffer);
+        while(position(3) > theta(3)+0.01 || position(3) < theta(3)-0.01)
+          [returnCode, position(3)] = simxGetJointPosition(clientID,shaft_handles_list(3),vrep.simx_opmode_buffer);
+        endwhile
         returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4), vrep.simx_opmode_oneshot);
-        simxPauseCommunication(clientID,0);
+        [returnCode, position(4)] = simxGetJointPosition(clientID,shaft_handles_list(4),vrep.simx_opmode_buffer);
+        while(position(4) > theta(4)+0.01 || position(4) < theta(4)-0.01)
+          [returnCode, position(4)] = simxGetJointPosition(clientID,shaft_handles_list(4),vrep.simx_opmode_buffer);
+        endwhile
+        simxSynchronousTrigger(clientID);
+        simxGetPingTime(clientID);
         val1 = input('Enter 0 to close gripper and 1 to open gripper');
         returnCode = simxSetIntegerSignal(clientID, 'RG2_open', val1, vrep.simx_opmode_oneshot)
         simxGetPingTime(clientID);
-        theta(2:4)=theta(2:4)-sign(theta(2:4))*10*pi/180;
+        theta(2:4)=0;
         pause(2);
-        simxPauseCommunication(clientID,1);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(1), theta(1), vrep.simx_opmode_oneshot);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
-        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
         returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(4), theta(4), vrep.simx_opmode_oneshot);
-        simxPauseCommunication(clientID,0);          
+        [returnCode, position(4)] = simxGetJointPosition(clientID,shaft_handles_list(4),vrep.simx_opmode_buffer);
+        while(position(4) > theta(4)+0.01 || position(4) < theta(4)-0.01)
+          [returnCode, position(4)] = simxGetJointPosition(clientID,shaft_handles_list(4),vrep.simx_opmode_buffer);
+        endwhile
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(3), theta(3), vrep.simx_opmode_oneshot);
+        [returnCode, position(3)] = simxGetJointPosition(clientID,shaft_handles_list(3),vrep.simx_opmode_buffer);
+        while(position(3) > theta(3)+0.01 || position(3) < theta(3)-0.01)
+          [returnCode, position(3)] = simxGetJointPosition(clientID,shaft_handles_list(3),vrep.simx_opmode_buffer);
+        endwhile
+        returnCode = simxSetJointTargetPosition(clientID, shaft_handles_list(2), theta(2), vrep.simx_opmode_oneshot);
+        [returnCode, position(2)] = simxGetJointPosition(clientID,shaft_handles_list(2),vrep.simx_opmode_buffer);
+        while(position(2) > theta(2)+0.01 || position(2) < theta(2)-0.01)
+          [returnCode, position(2)] = simxGetJointPosition(clientID,shaft_handles_list(2),vrep.simx_opmode_buffer);
+        endwhile
         pause(1);
-        simxPauseCommunication(clientID,0);
-        simxGetPingTime(clientID);
       else
       fprintf('Could not find soulution to given co-ordinates, please check \n')
       endif
