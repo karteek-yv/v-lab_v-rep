@@ -41,8 +41,6 @@ function DaguArmControl_PnP()
 	clientID=simxStart('127.0.0.1',19999,true,true,5000,5);
 	if (clientID>-1)
 		disp('Connected to remote API server');
-    simxSynchronous(clientID,true);
-    simxStartSimulation(clientID,vrep.simx_opmode_oneshot);
     for i = 1:5
       [returnCode,shaft_handles] = simxGetObjectHandle(clientID,strcat('Servo_shaft_',mat2str(i)),vrep.simx_opmode_blocking);
       shaft_handles_list(i)=shaft_handles;
