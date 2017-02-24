@@ -2,9 +2,9 @@ Simulation files for experiments at http://iitg.vlab.co.in/?sub=62&brch=271
 
 The robotic arm model is based on Dagu arm (http://www.dagurobot.com/goods.php?id=68). 
 
-It is designed by following the instructions given at http://www.coppeliarobotics.com/helpFiles/en/tutorials.htm , please go through 'Building a clean model' tutorial to get an idea of how the robotic arm is built. Also refer http://www.coppeliarobotics.com/helpFiles/en/objects.htm to know about differnt objects and reasons to use them. 
+It is designed by following the instructions given at http://www.coppeliarobotics.com/helpFiles/en/tutorials.htm , please go through 'Building a clean model' tutorial to get an idea of how the robotic arm is built. Also refer http://www.coppeliarobotics.com/helpFiles/en/objects.htm to know about different objects and reasons to use them. 
 
-For example instead of using random shapes in dynamic configuration, we have used similar pure shapes in dynamic configuration and made the corresponding random non-dynamic shape as its child. The reason for using such a configuration is, random shapes will have extremely largen number of triangle in meshes and will take long time for simulation. Please refer the links given above for more detaled instrucions.
+For example instead of using random shapes in dynamic configuration, we have used similar pure shapes in dynamic configuration and made the corresponding random non-dynamic shape as its child. The reason for using such a configuration is, random shapes will have extremely large number of triangle in meshes and will take long time for simulation. Please refer the links given above for more detailed instructions.
 
 Simulations can be done using child scripts in v-rep as well as using remoteAPI clients, instructions to enable clients written using different platforms are available at http://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm .
 
